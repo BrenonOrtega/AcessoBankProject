@@ -1,0 +1,61 @@
+version: "3.9"
+
+networks:
+  api-conta-network: 
+    driver: bridge
+  
+services:
+  api-conta:
+    image: baldini/testacesso
+    ports:
+        - "1000:80"
+    deploy:
+        resources:
+            limits:
+                memory: 300M
+    networks:
+        - api-conta-network
+            
+  db:
+    image: postgres
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    ports: 
+      - "5431:5432"
+    environment: 
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_DB: "bank-db"
+    networks:
+      - api-conta-network
+    deploy:
+        resources:
+            limits:
+                memory: 300M
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on: 
+      - db
+    networks: 
+      - api-conta-network
+
+  rabbit-mq:
+    image: "bitnami/rabbitmq:latest"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - api-conta-network
+    environment: 
+      - RABBITMQ_USERNAME=admin
+      - RABBITMQ_PASSWORD=admin
+      - RABBITMQ_PLUGINS=rabbitmq_management
+    deploy:
+      resources:
+          limits:
+              memory: 300M
