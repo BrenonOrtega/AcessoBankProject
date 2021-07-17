@@ -32,8 +32,9 @@ namespace FundTransfer.Infra.Services
 
         public async Task<Account> GetByAccountNumber(string accountNumber)
         {
-            var accounts = await GetAccounts();
-            return accounts.Single(account => account.AccountNumber.Equals(accountNumber));
+            var account = await _client.GetFromJsonAsync<Account>($"/api/Account/{ accountNumber }");
+            
+            return account;
         }
 
        
