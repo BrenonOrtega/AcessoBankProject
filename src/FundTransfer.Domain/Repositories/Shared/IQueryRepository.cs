@@ -1,11 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FundTransfer.Domain.Repositories.Shared
 {
     public interface IQueryRepository<T> where T : class
     {
-        IEnumerable<T> GetAll();
-        T GetById<V>(V id);
+        Task<IEnumerable<T>> GetAll();
+       
+        Task<T> GetById<V>(V id);
 
     }
 }

@@ -13,8 +13,8 @@ namespace FundTransfer.Domain.Models
 
         public DateTime CreatedAt { get; init; } = DateTime.Now;
 
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        
+        public DateTime UpdatedAt { get; private set; } = DateTime.Now;
+
         [Required, MinLength(5)]
         public string SourceAccountNumber { get; init; }
 
@@ -26,10 +26,10 @@ namespace FundTransfer.Domain.Models
 
         private TransferOrderStatus _status;
         [EnumDataType(typeof(TransferOrderStatus))]
-        public TransferOrderStatus Status 
-        { 
-            get => _status; 
-            set 
+        public TransferOrderStatus Status
+        {
+            get => _status;
+            set
             {
                 _status = value;
                 NotifyPropertyChanged();
@@ -41,15 +41,13 @@ namespace FundTransfer.Domain.Models
             UpdatedAt = DateTime.Now;
         }
 
-        public bool IsValid() 
+        public bool IsValid()
         {
-            return TransactionId.Equals(Guid.Empty)
-                && (String.IsNullOrEmpty(SourceAccountNumber) || String.IsNullOrEmpty(DestinationAccountNumber))
-                && Value <= Decimal.Zero
-            ;
+            return !(  TransactionId.Equals(Guid.Empty)
+                    &&(String.IsNullOrEmpty(SourceAccountNumber) || String.IsNullOrEmpty(DestinationAccountNumber))
+                    && Value >= Decimal.Zero
+                    && CreatedAt <= UpdatedAt
+                );
         }
-
-            
-
     }
 }

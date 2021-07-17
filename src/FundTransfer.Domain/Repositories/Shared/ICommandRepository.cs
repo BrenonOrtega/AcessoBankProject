@@ -1,9 +1,12 @@
+using System.Threading.Tasks;
+
 namespace FundTransfer.Domain.Repositories.Shared
 {
     public interface ICommandRepository<T> where T : class
     {
-        bool Create(T model);
-        bool Update(int Id, T model);
+        Task<bool> Create(T model);
+        
+        Task<bool> Update(int Id, T model);
 
     }
 }
