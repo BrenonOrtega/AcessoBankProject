@@ -22,8 +22,6 @@ namespace FundTransfer.Infra.Services
             _client = client;
         }
 
-
-
         public async Task PostAdjustmentAsync(BalanceAdjustment adjustment)
         {
             var adjustmentJson = new StringContent(
