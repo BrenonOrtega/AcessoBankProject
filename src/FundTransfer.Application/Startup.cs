@@ -1,10 +1,4 @@
-using System;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,10 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FundTransfer.Infra.Services;
 using Serilog;
-using FundTransfer.Domain.Repositories.Queries;
-using FundTransfer.Domain.Repositories.Commands;
-using FundTransfer.Infra.Repositories.Commands;
-using FundTransfer.Infra.Repositories.Queries;
+using FundTransfer.Application.Services;
+using FundTransfer.Infra.Helpers.Rabbitmq;
+using FundTransfer.Infra.Helpers;
 
 namespace AcessoTest.FundTransfer.Application
 {
@@ -33,6 +26,8 @@ namespace AcessoTest.FundTransfer.Application
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<RabbitmqConfiguration>(Configuration.GetSection(RabbitmqConfiguration.RabbitMQ));
+
             services.AddControllers()
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
@@ -41,11 +36,12 @@ namespace AcessoTest.FundTransfer.Application
             services.AddHttpClient<AccountService>();
             services.AddHttpClient<BalanceAdjustmentService>();
 
-            services.AddTransient<IAccountQueryRepository, HttpAccountQueryRepository>();
-            services.AddTransient<IBalanceAdjustmentCommandRepository, HttpBalanceAdjustmentCommandRepository>();
-            
+            services.AddHostedService<TransferOrderConsumerService>();
 
-            services.AddSwaggerGen(c => {
+            services.SetupApplicationInfra(Configuration);
+
+            services.AddSwaggerGen(c =>
+            {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AcessoTest.FundTransfer.Application", Version = "v1" });
             });
         }
