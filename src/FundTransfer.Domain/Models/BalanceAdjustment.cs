@@ -16,9 +16,9 @@ namespace FundTransfer.Domain.Models
         public decimal Value { get; set; }
         
 
-        [EnumDataType(typeof(BalanceAdjumentOperations))]
-        [JsonConverter(typeof(BalanceAdjumentOperations))]
-        public BalanceAdjumentOperations Type { get; set; }
+        [EnumDataType(typeof(BalanceAdjustmentOperations))]
+        [JsonConverter(typeof(BalanceAdjustmentOperations))]
+        public BalanceAdjustmentOperations Type { get; set; }
 
     }
 }
