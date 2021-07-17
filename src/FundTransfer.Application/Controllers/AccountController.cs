@@ -13,7 +13,6 @@ namespace FundTransfer.Application.Controllers
         private readonly IAccountQueryRepository _accountRepository;
         private readonly ILogger _logger;
 
-
         public AccountsController(IAccountQueryRepository accountRepository, ILogger<AccountsController> logger)
         {
             _accountRepository = accountRepository;
@@ -33,11 +32,11 @@ namespace FundTransfer.Application.Controllers
         {
             var account = await _accountRepository.GetByAccountNumber(accountNumber);
 
-            return account.IsEmpty()
-                ? NotFound()
-                : Ok(account);
+            return account.IsValid()
+                ? Ok(account)
+                : NotFound()
+                ;
         }
 
-        
     }
 }
