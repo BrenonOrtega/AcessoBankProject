@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace FundTransfer.Application.Services
+namespace FundTransfer.Infra.Services
 {
     public class TransferOrderConsumerService : BackgroundService
     {
