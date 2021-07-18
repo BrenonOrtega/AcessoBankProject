@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace FundTransfer.Domain.Repositories.Shared
@@ -6,7 +7,7 @@ namespace FundTransfer.Domain.Repositories.Shared
     {
         Task<bool> Create(T model);
         
-        Task<bool> Update(int Id, T model);
+        Task<bool> Update<VKey>(VKey Id, T model);
 
     }
 }
