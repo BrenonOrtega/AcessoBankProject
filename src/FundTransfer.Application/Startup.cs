@@ -29,11 +29,7 @@ namespace AcessoTest.FundTransfer.Application
             );
 
             ///<Summary>Application Setup</Summary>
-            services.AddFundTransferDb(Configuration)
-                .AddRepositories()
-                .AddAccountApiIntegration()
-                .AddTransferOrderMessageQueue()
-                .AddTransferOrderMessageConsumer();
+            services.AddApplicationInfra(Configuration);
 
             services.AddSwaggerGen(c =>
             {
