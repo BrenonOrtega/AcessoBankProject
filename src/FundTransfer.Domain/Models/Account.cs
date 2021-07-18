@@ -20,5 +20,8 @@ namespace FundTransfer.Domain.Models
 
             return true;
         }
+
+        public override string ToString() =>  $"ID: { Id } | Balance: { Balance } | Account Number: { AccountNumber }";
+        
     }
 }

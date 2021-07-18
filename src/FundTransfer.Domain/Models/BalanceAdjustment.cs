@@ -20,5 +20,7 @@ namespace FundTransfer.Domain.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public BalanceAdjustmentOperations Type { get; set; }
 
+        public override string ToString() =>  $"Account Number: { AccountNumber } | Operation Type: { Type } | Value: { Value } | ";
+
     }
 }
