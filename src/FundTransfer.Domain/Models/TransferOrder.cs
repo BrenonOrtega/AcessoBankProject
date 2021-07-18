@@ -38,28 +38,63 @@ namespace FundTransfer.Domain.Models
 
         public string ErrorMessage { get; set; }
 
-        private void NotifyPropertyChanged()
-        {
-            UpdatedAt = DateTime.Now;
-        }
 
         public bool IsValid()
         {
-            return !(  TransactionId.Equals(Guid.Empty)
-                    &&(String.IsNullOrEmpty(SourceAccountNumber) || String.IsNullOrEmpty(DestinationAccountNumber))
-                    && Value >= Decimal.Zero
-                    && CreatedAt <= UpdatedAt
-                );
+            return ValidTransactionId() && ValidAccountNumbers() && ValidTransactionValue();
         }
 
-        public void SetProcessingStatus() => Status = TransferOrderStatus.Processing;
+        private bool ValidTransactionId()
+        {
+            if (TransactionId.Equals(Guid.Empty))
+            {
+                SetErrorStatus("Transaction Id cannot be empty.");
+                return false;
+            }
 
-        public void ConfirmStatus() => Status = TransferOrderStatus.Confirmed;
+            return true;
+        }
+
+        private bool ValidAccountNumbers()
+        {
+            if (String.IsNullOrEmpty(SourceAccountNumber))
+            {
+                SetErrorStatus("Invalid source account number");
+                return false;
+            }
+
+            if (String.IsNullOrEmpty(DestinationAccountNumber))
+            {
+                SetErrorStatus("Invalid destination account number");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidTransactionValue()
+        {
+            if (Value <= Decimal.Zero)
+            {
+                SetErrorStatus("Invalid Transaction Value");
+                return false;
+            }
+            return true;
+        }
 
         public void SetErrorStatus(string errorMessage)
         {
             Status = TransferOrderStatus.Error;
             ErrorMessage = errorMessage;
         }
+
+        public void SetProcessingStatus() => Status = TransferOrderStatus.Processing;
+
+        public void ConfirmStatus() => Status = TransferOrderStatus.Confirmed;
+
+        private void NotifyPropertyChanged() => UpdatedAt = DateTime.Now;
+
+        public override string ToString() =>
+            $"Id: { TransactionId } | From: { SourceAccountNumber } | To: { DestinationAccountNumber } | Value: { Value }";
     }
 }
