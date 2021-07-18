@@ -3,7 +3,6 @@ using FundTransfer.Infra.Services;
 using FundTransfer.Domain.Models;
 using FundTransfer.Domain.Repositories.Commands;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 namespace FundTransfer.Infra.Repositories.Commands
@@ -32,10 +31,11 @@ namespace FundTransfer.Infra.Repositories.Commands
             return true;            
         }
 
-        public async Task<bool> Update(int Id, TransferOrder order)
+        public async Task<bool> Update<Guid>(Guid id, TransferOrder order)
         {
-            throw new System.NotImplementedException();
-
+            _context.TransferOrders.Update(order);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
