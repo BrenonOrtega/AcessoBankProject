@@ -1,14 +1,17 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FundTransfer.Infra.Data;
 using FundTransfer.Infra.Services;
+using FundTransfer.Infra.Helpers.Rabbitmq;
 using FundTransfer.Infra.Repositories.Commands;
 using FundTransfer.Infra.Repositories.Queries;
 using FundTransfer.Domain.Repositories.Commands;
 using FundTransfer.Domain.Repositories.Queries;
+using FundTransfer.Domain.Services;
 using Polly.Extensions.Http;
 using Polly;
 
@@ -16,8 +19,20 @@ namespace FundTransfer.Infra.Helpers
 {
     public static class ServicesSetup
     {
-        public static IServiceCollection AddFundTransferDb(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddApplicationInfra(this IServiceCollection services, IConfiguration config)
         {
+            services.AddConfigurations(config)
+                .AddRepositories()
+                .AddAccountApiIntegration()
+                .AddTransferOrderMessageQueue()
+                .AddTransferOrderMessageConsumer();
+
+            return services;
+        }
+        
+        public static IServiceCollection AddConfigurations(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<RabbitmqConfiguration>(config.GetSection(RabbitmqConfiguration.RabbitMQ));
             services.AddDbContext<FundTransferContext>(optionsBuilder =>
             {
                 optionsBuilder.UseNpgsql(config.GetConnectionString("postgres"), npgsqlBuilder =>
@@ -56,13 +71,13 @@ namespace FundTransfer.Infra.Helpers
         public static IServiceCollection AddAccountApiIntegration(this IServiceCollection services)
         {
             var defaultTimeSpan = TimeSpan.FromMinutes(5);
-            services.AddHttpClient<AccountService>()
+            services.AddHttpClient<IAccountService, AccountService>()
                 .SetHandlerLifetime(defaultTimeSpan)
                 .AddPolicyHandler(GetRetryPolicy());
 
-            services.AddHttpClient<BalanceAdjustmentService>()
+            services.AddHttpClient<IBalanceAdjustmentService, BalanceAdjustmentService>()
                 .SetHandlerLifetime(defaultTimeSpan)
-                .AddPolicyHandler(GetRetryPolicy());
+                .AddPolicyHandler(GetTransactionPolicy());
 
             return services;
         }
@@ -71,10 +86,18 @@ namespace FundTransfer.Infra.Helpers
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(msg => msg.IsSuccessStatusCode.Equals(false))
-                .WaitAndRetryAsync(10, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .OrResult(msg => !msg.StatusCode.Equals(HttpStatusCode.NotFound) && msg.IsSuccessStatusCode.Equals(false))
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                 ;
+        }
 
-        }    
+        private static IAsyncPolicy<HttpResponseMessage> GetTransactionPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(result => result.IsSuccessStatusCode.Equals(false))
+                .RetryForeverAsync()
+                ;
+        }
     }
 }
