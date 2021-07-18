@@ -7,7 +7,7 @@ namespace FundTransfer.Domain.Repositories.Commands
     {
         Task PostAdjustment(BalanceAdjustment adjustment);
 
-        Task PostDebitdjustment(string accountNumber, decimal Value);
+        Task PostDebitAdjustment(string accountNumber, decimal Value);
 
         Task PostCreditAdjustment(string accountNumber, decimal Value);
     }

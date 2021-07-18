@@ -17,7 +17,7 @@ namespace FundTransfer.Domain.Models
         
 
         [EnumDataType(typeof(BalanceAdjustmentOperations))]
-        [JsonConverter(typeof(BalanceAdjustmentOperations))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public BalanceAdjustmentOperations Type { get; set; }
 
     }
