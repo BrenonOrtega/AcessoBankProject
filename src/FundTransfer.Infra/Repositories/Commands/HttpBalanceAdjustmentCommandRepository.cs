@@ -1,24 +1,26 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using FundTransfer.Infra.Services;
-using FundTransfer.Domain.Models;
-using FundTransfer.Domain.Repositories.Commands;
 using FundTransfer.Domain.Enum;
-using System;
+using FundTransfer.Domain.Models;
+using FundTransfer.Domain.Services;
+using FundTransfer.Domain.Repositories.Commands;
 
 namespace FundTransfer.Infra.Repositories.Commands
 {
     public class HttpBalanceAdjustmentCommandRepository : IBalanceAdjustmentCommandRepository
     {
-        private readonly BalanceAdjustmentService _service;
+        private readonly IBalanceAdjustmentService _service;
+
         private readonly ILogger<HttpBalanceAdjustmentCommandRepository> _logger;
 
-        public HttpBalanceAdjustmentCommandRepository(BalanceAdjustmentService service, ILogger<HttpBalanceAdjustmentCommandRepository> logger)
+        public HttpBalanceAdjustmentCommandRepository(IBalanceAdjustmentService service, ILogger<HttpBalanceAdjustmentCommandRepository> logger)
         {
             _service = service;
             _logger = logger;
         }
+        
         public async Task PostAdjustment(BalanceAdjustment adjustment)
         {
             try
@@ -33,20 +35,19 @@ namespace FundTransfer.Infra.Repositories.Commands
 
         public async Task PostDebitAdjustment(string accountNumber, decimal value)
         {
-            var debitAdjustment = new BalanceAdjustment() 
+            var debitAdjustment = new BalanceAdjustment()
             {
-                AccountNumber = accountNumber, 
+                AccountNumber = accountNumber,
                 Type = BalanceAdjustmentOperations.Debit,
                 Value = value
             };
 
             await PostAdjustment(debitAdjustment);
 
-             var date = DateTime.Now;
             _logger.LogInformation("{OperationType} operation executed at {date} Account Number: {accountNumber} - Value: {value}",
                 BalanceAdjustmentOperations.Debit,
-                date, 
-                accountNumber, 
+                DateTime.Now,
+                accountNumber,
                 value
             );
         }
@@ -62,10 +63,9 @@ namespace FundTransfer.Infra.Repositories.Commands
 
             await PostAdjustment(creditAdjustment);
 
-            var date = DateTime.Now;
             _logger.LogInformation("{OperationType} operation executed at {date} Account Number: {accountNumber} - Value: {value}",
                 BalanceAdjustmentOperations.Credit,
-                date,
+                DateTime.Now,
                 accountNumber,
                 value
             );

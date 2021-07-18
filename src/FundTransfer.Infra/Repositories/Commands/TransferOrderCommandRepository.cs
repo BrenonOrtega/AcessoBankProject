@@ -12,6 +12,7 @@ namespace FundTransfer.Infra.Repositories.Commands
         private readonly TransferOrderPublisher _publisher;
 
         private readonly FundTransferContext _context;
+        
         private readonly ILogger<TransferOrderCommandRepository> _logger;
 
         public TransferOrderCommandRepository(TransferOrderPublisher publisher, FundTransferContext context, ILogger<TransferOrderCommandRepository> logger)

@@ -1,14 +1,15 @@
 using System;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Net.Http;
 using System.Threading.Tasks;
 using FundTransfer.Domain.Models;
+using FundTransfer.Domain.Services;
 using Microsoft.Extensions.Configuration;
 
 namespace FundTransfer.Infra.Services
 {
-    public class BalanceAdjustmentService
+    public class BalanceAdjustmentService :  IBalanceAdjustmentService
     {
         private const string accountApiConfigName = "AccountApi";
         private readonly HttpClient _client;

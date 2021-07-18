@@ -4,15 +4,16 @@ using FundTransfer.Domain.Repositories.Queries;
 using FundTransfer.Domain.Models;
 using FundTransfer.Infra.Services;
 using Microsoft.Extensions.Logging;
+using FundTransfer.Domain.Services;
 
 namespace FundTransfer.Infra.Repositories.Queries
 {
     public class HttpAccountQueryRepository : IAccountQueryRepository
     {
-        private readonly AccountService _service;
+        private readonly IAccountService _service;
         public ILogger _logger;
         
-        public HttpAccountQueryRepository(AccountService service, ILogger<HttpAccountQueryRepository> logger)
+        public HttpAccountQueryRepository(IAccountService service, ILogger<HttpAccountQueryRepository> logger)
         {
             _service = service;
             _logger = logger;
