@@ -39,8 +39,12 @@ namespace FundTransfer.Application.Controllers
             {
                 TransferOrder order = orderDto.ToTransferOrder();
 
-                if (order.IsValid() is false)
-                    return Problem();
+                if (!order.IsValid())
+                {
+                    string errorMsg = $"Error while processing order Request Number {order.TransactionId}: {order.ErrorMessage}";
+                    _logger.LogError(errorMsg, order);
+                    return BadRequest(new { message = errorMsg, order.TransactionId, order.ErrorMessage });
+                }
 
                 await _transferOrderCommander.Create(order);
 
@@ -48,7 +52,7 @@ namespace FundTransfer.Application.Controllers
                 return CreatedAtAction(nameof(Get), result, result);
             }
 
-            return Problem();
+            return BadRequest(new { Message = "Invalid account numbers." });
         }
 
         [HttpGet]
