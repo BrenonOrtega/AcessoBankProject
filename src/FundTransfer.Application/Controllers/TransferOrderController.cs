@@ -1,12 +1,11 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using FundTransfer.Application.Dtos;
 using FundTransfer.Domain.Models;
 using FundTransfer.Domain.Repositories.Queries;
 using FundTransfer.Domain.Repositories.Commands;
-using System.Linq;
-using System;
-using FundTransfer.Application.Dtos;
 
 namespace FundTransfer.Application.Controllers
 {
@@ -32,11 +31,11 @@ namespace FundTransfer.Application.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]TransferOrderDto orderDto)
+        public async Task<IActionResult> Post([FromBody] TransferOrderDto orderDto)
         {
             var (sourceAccount, destinationAccount) = await GetOrderAccounts(orderDto);
 
-            if(IsOperationAccountsValid(sourceAccount, destinationAccount))
+            if (IsOperationAccountsValid(sourceAccount, destinationAccount))
             {
                 TransferOrder order = orderDto.ToTransferOrder();
 
