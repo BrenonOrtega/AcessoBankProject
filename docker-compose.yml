@@ -39,7 +39,6 @@ services:
     image: adminer
     ports:
       - "8080:8080"
-    restart: "always"
     depends_on: 
       - db
     networks: 
@@ -59,4 +58,4 @@ services:
     deploy:
       resources:
           limits:
-              memory: 300M
+              memory: 450M
