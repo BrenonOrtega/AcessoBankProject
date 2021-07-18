@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using FundTransfer.Domain.Enum;
 
 namespace FundTransfer.Domain.Models
@@ -25,16 +24,19 @@ namespace FundTransfer.Domain.Models
         public decimal Value { get; init; }
 
         private TransferOrderStatus _status;
+
         [EnumDataType(typeof(TransferOrderStatus))]
         public TransferOrderStatus Status
         {
             get => _status;
-            set
+            private set
             {
                 _status = value;
                 NotifyPropertyChanged();
             }
         }
+
+        public string ErrorMessage { get; set; }
 
         private void NotifyPropertyChanged()
         {
@@ -48,6 +50,16 @@ namespace FundTransfer.Domain.Models
                     && Value >= Decimal.Zero
                     && CreatedAt <= UpdatedAt
                 );
+        }
+
+        public void SetProcessingStatus() => Status = TransferOrderStatus.Processing;
+
+        public void ConfirmStatus() => Status = TransferOrderStatus.Confirmed;
+
+        public void SetErrorStatus(string errorMessage)
+        {
+            Status = TransferOrderStatus.Error;
+            ErrorMessage = errorMessage;
         }
     }
 }
