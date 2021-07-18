@@ -29,11 +29,12 @@ namespace FundTransfer.Application.Dtos
 
         public bool IsValid()
         {
-            var nullOrEmpties = ! (String.IsNullOrEmpty(SourceAccountNumber) || String.IsNullOrEmpty(DestinationAccountNumber));
-            var accountsEquals = SourceAccountNumber.Equals(DestinationAccountNumber);
-            var invalidValue = Value <= Decimal.Zero;
+            var sameAccountNumbers = SourceAccountNumber.Equals(DestinationAccountNumber);
+            var sourceAccountValid = false.Equals(String.IsNullOrEmpty(SourceAccountNumber));
+            var destinationAccountValud = false.Equals(String.IsNullOrEmpty(DestinationAccountNumber));
+            var validValue = Value >= Decimal.Zero;
 
-            return !(nullOrEmpties && accountsEquals && invalidValue);
+            return sameAccountNumbers == false && sourceAccountValid && destinationAccountValud &&  validValue;
         }
 
         public TransferOrder ToTransferOrder()
@@ -45,12 +46,6 @@ namespace FundTransfer.Application.Dtos
                     DestinationAccountNumber = SourceAccountNumber,
                     Value = Value,
                 };
-
-            _logger.LogError("Invalid information was provided for transfer order creation - {order}, {SourceAccountNumber}, {DestinationAccountNumber}",
-                this,
-                SourceAccountNumber,
-                DestinationAccountNumber
-            );
 
             throw new ArgumentException();
         }
