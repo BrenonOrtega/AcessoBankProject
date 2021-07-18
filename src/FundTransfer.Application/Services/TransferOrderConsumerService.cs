@@ -3,9 +3,12 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using FundTransfer.Domain.Repositories.Commands;
-using FundTransfer.Infra.Helpers.Rabbitmq;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using FundTransfer.Domain.Models;
+using FundTransfer.Infra.Helpers.Rabbitmq;
+using FundTransfer.Domain.Repositories.Commands;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,32 +19,32 @@ namespace FundTransfer.Application.Services
     {
         private readonly RabbitmqConfiguration _rabbitmqConfig;
 
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
+        private readonly ILogger<TransferOrderConsumerService> _logger;
+
         private readonly ConnectionFactory _factory;
 
         private readonly IConnection _connection;
 
         private readonly IModel _channel;
 
-        private readonly ITransferOrderCommandRepository _orderCommander;
-
-        private readonly IBalanceAdjustmentCommandRepository _balanceCommander;
-
         public TransferOrderConsumerService(
             IOptions<RabbitmqConfiguration> option,
-            ITransferOrderCommandRepository orderCommander,
-            IBalanceAdjustmentCommandRepository balanceCommander
-        ){
+            ILogger<TransferOrderConsumerService> logger,
+            IServiceScopeFactory serviceScopeFactory)
+        {
             _rabbitmqConfig = option.Value;
-
-            _orderCommander = orderCommander;
-            _balanceCommander = balanceCommander;
+            _serviceScopeFactory = serviceScopeFactory;
+            _logger = logger;
 
             _factory = new()
             {
                 HostName = _rabbitmqConfig.Hostname,
                 Port = _rabbitmqConfig.Port,
                 UserName = _rabbitmqConfig.Username,
-                Password = _rabbitmqConfig.Password
+                Password = _rabbitmqConfig.Password,
+                DispatchConsumersAsync = true
             };
 
             _connection = _factory.CreateConnection();
@@ -56,28 +59,59 @@ namespace FundTransfer.Application.Services
             );
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var consumer = new EventingBasicConsumer(_channel);
+            stoppingToken.ThrowIfCancellationRequested();
 
-            consumer.Received += (sender, eventArgs) =>
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.Received += async (sender, eventArgs) =>
             {
                 var contentArray = eventArgs.Body.ToArray();
                 var contentString = Encoding.UTF8.GetString(contentArray);
-                var message = JsonSerializer.Deserialize<TransferOrderConsumerService>(contentString);
 
-                
+                var order = JsonSerializer.Deserialize<TransferOrder>(contentString);
+                var orderId = order.TransactionId;
+                var value = order.Value;
+
+                var _orderCommander = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITransferOrderCommandRepository>();
+                var _balanceCommander = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBalanceAdjustmentCommandRepository>();
+
+                try
+                {
+
+                    order.SetProcessingStatus();
+                    await _orderCommander.Update(orderId, order);
+
+                    order.ConfirmStatus();
+
+                    await _balanceCommander.PostDebitAdjustment(order.SourceAccountNumber, value);
+                    await _balanceCommander.PostCreditAdjustment(order.DestinationAccountNumber, value);
+                    await _orderCommander.Update(orderId, order);
+
+                    _logger.LogInformation("Transfer Order {orderId} executed between accounts {sourceAccount} - {destinationAccount}",
+                        orderId, order.SourceAccountNumber, order.DestinationAccountNumber);
+
+                    _channel.BasicAck(eventArgs.DeliveryTag, false);
+                }
+                catch (Exception exception)
+                {
+                    order.SetErrorStatus(exception.Message);
+                    await _orderCommander.Update(orderId, order);
+
+                    _logger.LogError(
+                        exception,
+                        "Error while executing transfer operation on message {TransactionId} {errorMessage}",
+                        order.TransactionId,
+                        exception.Message
+                    );
+
+                    _channel.BasicNack(eventArgs.DeliveryTag, false, true);
+                }
 
             };
 
-            _channel.BasicConsume(
-                queue: _rabbitmqConfig.QueueName,
-                autoAck: false,
-                consumer: consumer
-            );
-
-            return Task.CompletedTask;
+            string tag = _channel.BasicConsume(_rabbitmqConfig.QueueName, false, consumer);
+            await Task.CompletedTask;
         }
-
     }
 }
