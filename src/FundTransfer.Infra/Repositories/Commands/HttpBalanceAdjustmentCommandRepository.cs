@@ -31,7 +31,7 @@ namespace FundTransfer.Infra.Repositories.Commands
             }
         }
 
-        public async Task PostDebitdjustment(string accountNumber, decimal value)
+        public async Task PostDebitAdjustment(string accountNumber, decimal value)
         {
             var debitAdjustment = new BalanceAdjustment() 
             {

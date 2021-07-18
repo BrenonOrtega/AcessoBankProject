@@ -1,21 +1,17 @@
-using Microsoft.Extensions.Options;
-using FundTransfer.Infra.Helpers.Rabbitmq;
-using FundTransfer.Domain.Models;
+using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
-using RabbitMQ.Client;
+using FundTransfer.Infra.Helpers.Rabbitmq;
+using FundTransfer.Domain.Models;
+using Microsoft.Extensions.Options;
 
 namespace FundTransfer.Infra.Services
 {
     public class TransferOrderPublisher
     {
         private readonly RabbitmqConfiguration _rabbitmqConfig;
-       
-        private readonly ConnectionFactory _factory;
 
-        private readonly IConnection _connection;
-        
-        private readonly IModel _channel;
+        private readonly ConnectionFactory _factory;
 
         public TransferOrderPublisher(IOptions<RabbitmqConfiguration> options)
         {

@@ -15,7 +15,7 @@ namespace FundTransfer.Infra.Services
     {
         private const string accountApiConfigName = "AccountApi";
         private readonly HttpClient _client;
-        
+
         public AccountService(HttpClient client, IConfiguration config)
         {
             client.BaseAddress = new Uri(config.GetValue<string>(accountApiConfigName));
@@ -33,10 +33,8 @@ namespace FundTransfer.Infra.Services
         public async Task<Account> GetByAccountNumber(string accountNumber)
         {
             var account = await _client.GetFromJsonAsync<Account>($"/api/Account/{ accountNumber }");
-            
+
             return account;
         }
-
-       
     }
 }
