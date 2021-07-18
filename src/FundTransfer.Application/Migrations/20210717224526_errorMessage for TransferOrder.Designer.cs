@@ -3,15 +3,17 @@ using System;
 using FundTransfer.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace FundTransfer.Application.Migrations
 {
     [DbContext(typeof(FundTransferContext))]
-    partial class FundTransferContextModelSnapshot : ModelSnapshot
+    [Migration("20210717224526_errorMessage for TransferOrder")]
+    partial class errorMessageforTransferOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
