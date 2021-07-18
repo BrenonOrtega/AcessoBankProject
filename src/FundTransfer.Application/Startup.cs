@@ -6,11 +6,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using FundTransfer.Infra.Services;
-using Serilog;
-using FundTransfer.Application.Services;
-using FundTransfer.Infra.Helpers.Rabbitmq;
 using FundTransfer.Infra.Helpers;
+using Serilog;
 
 namespace AcessoTest.FundTransfer.Application
 {
@@ -26,19 +23,17 @@ namespace AcessoTest.FundTransfer.Application
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<RabbitmqConfiguration>(Configuration.GetSection(RabbitmqConfiguration.RabbitMQ));
-
             services.AddControllers()
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
-                );
+            );
 
-            services.AddHttpClient<AccountService>();
-            services.AddHttpClient<BalanceAdjustmentService>();
-
-            services.AddHostedService<TransferOrderConsumerService>();
-
-            services.SetupApplicationInfra(Configuration);
+            ///<Summary>Application Setup</Summary>
+            services.AddFundTransferDb(Configuration)
+                .AddRepositories()
+                .AddAccountApiIntegration()
+                .AddTransferOrderMessageQueue()
+                .AddTransferOrderMessageConsumer();
 
             services.AddSwaggerGen(c =>
             {
