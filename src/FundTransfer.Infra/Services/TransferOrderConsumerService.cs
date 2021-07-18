@@ -44,7 +44,8 @@ namespace FundTransfer.Infra.Services
                 Port = _rabbitmqConfig.Port,
                 UserName = _rabbitmqConfig.Username,
                 Password = _rabbitmqConfig.Password,
-                DispatchConsumersAsync = true
+                DispatchConsumersAsync = true,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(_rabbitmqConfig.NetworkRecoveryIntervalInSeconds)
             };
 
             _connection = _factory.CreateConnection();
@@ -64,50 +65,68 @@ namespace FundTransfer.Infra.Services
             stoppingToken.ThrowIfCancellationRequested();
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
+
             consumer.Received += async (sender, eventArgs) =>
             {
                 var contentArray = eventArgs.Body.ToArray();
                 var contentString = Encoding.UTF8.GetString(contentArray);
-
-                var order = JsonSerializer.Deserialize<TransferOrder>(contentString);
-                var orderId = order.TransactionId;
-                var value = order.Value;
+                var receivedOrder = JsonSerializer.Deserialize<TransferOrder>(contentString);
 
                 var _orderCommander = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITransferOrderCommandRepository>();
                 var _balanceCommander = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBalanceAdjustmentCommandRepository>();
 
                 try
                 {
+                    await StartsProcessing(receivedOrder);
+                    await TransferValue(receivedOrder);
+                    FinishTransaction(receivedOrder);
+                }
+                catch (Exception ex)
+                {
+                    await HandleTransactionException(receivedOrder, ex);
+                }
 
+                async Task StartsProcessing(TransferOrder order)
+                {
                     order.SetProcessingStatus();
-                    await _orderCommander.Update(orderId, order);
+                    await _orderCommander.Update(order.TransactionId, order);
+                }
 
+                async Task TransferValue(TransferOrder order)
+                {
                     order.ConfirmStatus();
 
-                    await _balanceCommander.PostDebitAdjustment(order.SourceAccountNumber, value);
-                    await _balanceCommander.PostCreditAdjustment(order.DestinationAccountNumber, value);
-                    await _orderCommander.Update(orderId, order);
+                    await _balanceCommander.PostDebitAdjustment(order.SourceAccountNumber, order.Value);
+                    await _balanceCommander.PostCreditAdjustment(order.DestinationAccountNumber, order.Value);
 
-                    _logger.LogInformation("Transfer Order {orderId} executed between accounts {sourceAccount} - {destinationAccount}",
-                        orderId, order.SourceAccountNumber, order.DestinationAccountNumber);
+                    await _orderCommander.Update(order.TransactionId, order);
+                }
+
+                void FinishTransaction(TransferOrder order)
+                {
+                    _logger.LogInformation(
+                        "Transfer Order {orderId} executed between accounts {sourceAccount} - {destinationAccount}",
+                        order.TransactionId,
+                        order.SourceAccountNumber,
+                        order.DestinationAccountNumber);
 
                     _channel.BasicAck(eventArgs.DeliveryTag, false);
                 }
-                catch (Exception exception)
+
+                async Task HandleTransactionException(TransferOrder order, Exception ex)
                 {
-                    order.SetErrorStatus(exception.Message);
-                    await _orderCommander.Update(orderId, order);
+                    receivedOrder.SetErrorStatus(ex.Message);
+                    await _orderCommander.Update(order, order);
 
                     _logger.LogError(
-                        exception,
+                        ex,
                         "Error while executing transfer operation on message {TransactionId} {errorMessage}",
                         order.TransactionId,
-                        exception.Message
+                        ex.Message
                     );
 
                     _channel.BasicNack(eventArgs.DeliveryTag, false, true);
                 }
-
             };
 
             string tag = _channel.BasicConsume(_rabbitmqConfig.QueueName, false, consumer);

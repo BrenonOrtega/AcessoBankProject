@@ -1,9 +1,10 @@
-using RabbitMQ.Client;
+using System;
 using System.Text;
 using System.Text.Json;
-using FundTransfer.Infra.Helpers.Rabbitmq;
-using FundTransfer.Domain.Models;
 using Microsoft.Extensions.Options;
+using FundTransfer.Domain.Models;
+using FundTransfer.Infra.Helpers.Rabbitmq;
+using RabbitMQ.Client;
 
 namespace FundTransfer.Infra.Services
 {
@@ -22,7 +23,8 @@ namespace FundTransfer.Infra.Services
                 HostName = _rabbitmqConfig.Hostname,
                 Port = _rabbitmqConfig.Port,
                 UserName = _rabbitmqConfig.Username,
-                Password = _rabbitmqConfig.Password
+                Password = _rabbitmqConfig.Password,
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(_rabbitmqConfig.NetworkRecoveryIntervalInSeconds)
             };
         }
 
@@ -39,17 +41,10 @@ namespace FundTransfer.Infra.Services
                 arguments: null
             );
 
-
             var content = JsonSerializer.Serialize<TransferOrder>(order);
             var byteMessage = Encoding.UTF8.GetBytes(content);
 
-            channel.BasicPublish(
-                exchange: "",
-                routingKey: _rabbitmqConfig.QueueName,
-                basicProperties: null,
-                body: byteMessage
-            );
+            channel.BasicPublish("", _rabbitmqConfig.QueueName, null, byteMessage);
         }
-
     }
 }
