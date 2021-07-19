@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using FundTransfer.Domain.Models;
 
 namespace FundTransfer.Domain.Repositories.Queries

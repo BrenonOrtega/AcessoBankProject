@@ -20,7 +20,7 @@ namespace FundTransfer.Infra.Repositories.Commands
             _service = service;
             _logger = logger;
         }
-        
+
         public async Task PostAdjustment(BalanceAdjustment adjustment)
         {
             try
@@ -44,7 +44,9 @@ namespace FundTransfer.Infra.Repositories.Commands
 
             await PostAdjustment(debitAdjustment);
 
-            _logger.LogInformation("{OperationType} operation executed at {date} Account Number: {accountNumber} - Value: {value}",
+            _logger.LogInformation(
+                "{OperationType} operation executed at {date}" +
+                "Account Number: {accountNumber} - Value: {value}",
                 BalanceAdjustmentOperations.Debit,
                 DateTime.Now,
                 accountNumber,
@@ -63,7 +65,9 @@ namespace FundTransfer.Infra.Repositories.Commands
 
             await PostAdjustment(creditAdjustment);
 
-            _logger.LogInformation("{OperationType} operation executed at {date} Account Number: {accountNumber} - Value: {value}",
+            _logger.LogInformation(
+                "{OperationType} operation executed at {date}" +
+                "Account Number: {accountNumber} - Value: {value}",
                 BalanceAdjustmentOperations.Credit,
                 DateTime.Now,
                 accountNumber,

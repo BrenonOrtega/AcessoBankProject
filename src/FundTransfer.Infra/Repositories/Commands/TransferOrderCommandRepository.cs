@@ -1,9 +1,9 @@
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using FundTransfer.Infra.Data;
 using FundTransfer.Infra.Services;
 using FundTransfer.Domain.Models;
 using FundTransfer.Domain.Repositories.Commands;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace FundTransfer.Infra.Repositories.Commands
 {
@@ -12,7 +12,7 @@ namespace FundTransfer.Infra.Repositories.Commands
         private readonly TransferOrderPublisher _publisher;
 
         private readonly FundTransferContext _context;
-        
+
         private readonly ILogger<TransferOrderCommandRepository> _logger;
 
         public TransferOrderCommandRepository(TransferOrderPublisher publisher, FundTransferContext context, ILogger<TransferOrderCommandRepository> logger)
@@ -29,7 +29,7 @@ namespace FundTransfer.Infra.Repositories.Commands
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Creating and publishing Fund Transfer Order {order}", model);
-            return true;            
+            return true;
         }
 
         public async Task<bool> Update<Guid>(Guid id, TransferOrder model)

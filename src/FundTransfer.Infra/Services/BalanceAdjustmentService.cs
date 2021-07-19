@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace FundTransfer.Infra.Services
 {
-    public class BalanceAdjustmentService :  IBalanceAdjustmentService
+    public class BalanceAdjustmentService : IBalanceAdjustmentService
     {
         private const string accountApiConfigName = "AccountApi";
         private readonly HttpClient _client;

@@ -5,6 +5,5 @@ namespace FundTransfer.Domain.Repositories.Commands
 {
     public interface ITransferOrderCommandRepository : ICommandRepository<TransferOrder>
     {
-         
     }
 }

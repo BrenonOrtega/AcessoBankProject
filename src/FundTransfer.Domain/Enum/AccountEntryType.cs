@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace FundTransfer.Domain.Enum 
+namespace FundTransfer.Domain.Enum
 {
     public enum BalanceAdjustmentOperations
     {

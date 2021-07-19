@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using FundTransfer.Domain.Models;
 
@@ -23,7 +22,7 @@ namespace FundTransfer.Application.Dtos
             var destinationAccountValud = false.Equals(String.IsNullOrEmpty(DestinationAccountNumber));
             var validValue = Value >= Decimal.Zero;
 
-            return !sameAccountNumbers  && sourceAccountValid && destinationAccountValud &&  validValue;
+            return !sameAccountNumbers && sourceAccountValid && destinationAccountValud && validValue;
         }
 
         public TransferOrder ToTransferOrder()

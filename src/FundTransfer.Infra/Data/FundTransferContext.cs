@@ -10,6 +10,5 @@ namespace FundTransfer.Infra.Data
         }
 
         public DbSet<TransferOrder> TransferOrders { get; set; }
-        
     }
 }

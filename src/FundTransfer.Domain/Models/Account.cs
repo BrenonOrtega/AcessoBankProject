@@ -1,5 +1,4 @@
 using System;
-using FundTransfer.Domain.Repositories.Queries;
 
 namespace FundTransfer.Domain.Models
 {
@@ -21,7 +20,7 @@ namespace FundTransfer.Domain.Models
             return true;
         }
 
-        public override string ToString() =>  $"ID: { Id } | Balance: { Balance } | Account Number: { AccountNumber }";
-        
+        public override string ToString() => 
+            $"ID: { Id } | Balance: { Balance } | Account Number: { AccountNumber }";
     }
 }
