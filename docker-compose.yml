@@ -1,7 +1,7 @@
 version: "3.9"
 
 networks:
-  api-conta-network: 
+  fund-transfer-network: 
     driver: bridge
   
 services:
@@ -14,7 +14,9 @@ services:
             limits:
                 memory: 300M
     networks:
-        - api-conta-network
+        - fund-transfer-network
+    depends_on:
+      - rabbit-mq
             
   db:
     image: postgres
@@ -29,7 +31,9 @@ services:
       POSTGRES_PASSWORD: "admin"
       POSTGRES_DB: "bank-db"
     networks:
-      - api-conta-network
+      - fund-transfer-network
+    depends_on:
+      - rabbit-mq
     deploy:
         resources:
             limits:
@@ -41,8 +45,9 @@ services:
       - "8080:8080"
     depends_on: 
       - db
+      - rabbit-mq
     networks: 
-      - api-conta-network
+      - fund-transfer-network
 
   rabbit-mq:
     image: "bitnami/rabbitmq:latest"
@@ -50,7 +55,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - api-conta-network
+      - fund-transfer-network
     environment: 
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
