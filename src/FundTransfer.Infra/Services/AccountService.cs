@@ -1,18 +1,12 @@
 using System;
-using System.Text;
-using System.Text.Json;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using FundTransfer.Domain.Models;
 using FundTransfer.Domain.Services;
 
 namespace FundTransfer.Infra.Services
 {
-    public class AccountService : IAccountService
+    public class AccountService : IAccountService<HttpResponseMessage>
     {
         private const string ACCOUNT_API_CONFIG_BASE_URL = "AccountApi";
         private const string ACCOUNT_API_CONFIG_GET_BY_NUMBER_ENDPOINT = "AccountApi-GetAccount";
@@ -31,25 +25,18 @@ namespace FundTransfer.Infra.Services
             _client = client;
         }
 
-        public async Task<IEnumerable<Account>> GetAccounts()
+        public async Task<HttpResponseMessage> GetAccounts()
         {
-            return await _client.GetFromJsonAsync<IEnumerable<Account>>(getAccountEndpoint);
+            var response =  await _client.GetAsync(getAccountEndpoint);
+            
+            return response;
         }
 
-        public async Task<Account> GetByAccountNumber(string accountNumber)
+        public async Task<HttpResponseMessage> GetByAccountNumber(string accountNumber)
         {
             var response = await _client.GetAsync($"{ getAccountEndpoint }/{ accountNumber }", HttpCompletionOption.ResponseContentRead);
-
-            if (response.StatusCode.Equals(HttpStatusCode.NotFound))
-            {
-                return new Account();
-            }
-
-            var content = await response.Content.ReadAsByteArrayAsync();
-            var encodedContent = Encoding.UTF8.GetString(content);
-            var account = JsonSerializer.Deserialize<Account>(encodedContent, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-
-            return account;
+            
+            return response;
         }
     }
 }

@@ -21,14 +21,14 @@ namespace FundTransfer.Infra.Repositories.Queries
             return await _context.TransferOrders.ToListAsync();
         }
 
-        public Task<TransferOrder> GetByAccountNumber(string number)
+        public async Task<TransferOrder> GetByAccountNumber(string number)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TransferOrder> GetById<V>(V id)
+        public async Task<TransferOrder> GetById<V>(V id)
         {
-            throw new NotImplementedException();
+            return await _context.TransferOrders.FirstOrDefaultAsync(order => order.TransactionId.Equals(id));
         }
     }
 }
