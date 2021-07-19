@@ -27,15 +27,17 @@ namespace FundTransfer.Infra.Services
 
         public async Task<HttpResponseMessage> GetAccounts()
         {
-            var response =  await _client.GetAsync(getAccountEndpoint);
-            
+            var response = await _client.GetAsync(getAccountEndpoint);
+            response.EnsureSuccessStatusCode();
+
             return response;
         }
 
         public async Task<HttpResponseMessage> GetByAccountNumber(string accountNumber)
         {
             var response = await _client.GetAsync($"{ getAccountEndpoint }/{ accountNumber }", HttpCompletionOption.ResponseContentRead);
-            
+            response.EnsureSuccessStatusCode();
+
             return response;
         }
     }
