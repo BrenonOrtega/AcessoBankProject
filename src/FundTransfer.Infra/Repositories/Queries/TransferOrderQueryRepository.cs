@@ -10,7 +10,7 @@ namespace FundTransfer.Infra.Repositories.Queries
 {
     public class TransferOrderQueryRepository : ITransferOrderQueryRepository
     {
-        FundTransferContext _context;
+        private readonly FundTransferContext _context;
 
         public TransferOrderQueryRepository(FundTransferContext context)
         {
@@ -23,9 +23,9 @@ namespace FundTransfer.Infra.Repositories.Queries
 
         public async Task<TransferOrder> GetByAccountNumber(string number)
         {
-            throw new NotImplementedException();
+            return await _context.TransferOrders.FirstOrDefaultAsync(order => order.SourceAccountNumber.ToLower().Equals(number.ToLower()));
         }
-
+        
         public async Task<TransferOrder> GetById<V>(V id)
         {
             return await _context.TransferOrders.FirstOrDefaultAsync(order => order.TransactionId.Equals(id));

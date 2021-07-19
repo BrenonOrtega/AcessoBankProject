@@ -7,7 +7,7 @@ namespace FundTransfer.Domain.Repositories.Shared
     {
         Task<bool> Create(T model);
         
-        Task<bool> Update<VKey>(VKey Id, T model);
+        Task<bool> Update<VKey>(VKey id, T model);
 
     }
 }

@@ -6,7 +6,7 @@ using System.Security.Authentication;
 
 namespace AcessoTest.FundTransfer.Application
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -20,14 +20,6 @@ namespace AcessoTest.FundTransfer.Application
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel(kestrelOptions =>
-                   {
-                       kestrelOptions.ConfigureHttpsDefaults(httpsOptions =>
-                       {
-                           httpsOptions.SslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12;
-                       });
-                   });
-
                     webBuilder.UseStartup<Startup>();
                 });
     }

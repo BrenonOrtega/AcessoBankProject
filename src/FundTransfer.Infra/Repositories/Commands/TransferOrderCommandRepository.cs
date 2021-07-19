@@ -22,19 +22,19 @@ namespace FundTransfer.Infra.Repositories.Commands
             _logger = logger;
         }
 
-        public async Task<bool> Create(TransferOrder order)
+        public async Task<bool> Create(TransferOrder model)
         {
-            _context.TransferOrders.Add(order);
-            _publisher.PostMessage(order);
+            _context.TransferOrders.Add(model);
+            _publisher.PostMessage(model);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Creating and publishing Fund Transfer Order {order}", order);
+            _logger.LogInformation("Creating and publishing Fund Transfer Order {order}", model);
             return true;            
         }
 
-        public async Task<bool> Update<Guid>(Guid id, TransferOrder order)
+        public async Task<bool> Update<Guid>(Guid id, TransferOrder model)
         {
-            _context.TransferOrders.Update(order);
+            _context.TransferOrders.Update(model);
             await _context.SaveChangesAsync();
             return true;
         }

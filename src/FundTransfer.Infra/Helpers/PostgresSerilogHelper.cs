@@ -1,12 +1,13 @@
-using System.Collections.Generic;
 using NpgsqlTypes;
 using Serilog.Sinks.PostgreSQL;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace FundTransfer.Infra.Helpers
 {
-    public class PostgresSerilogHelper
+    public static class PostgresSerilogHelper
     {
-        public static IDictionary<string, ColumnWriterBase> columnWriters = new Dictionary<string, ColumnWriterBase>
+        public static readonly ImmutableDictionary<string, ColumnWriterBase> columnWriters = new Dictionary<string, ColumnWriterBase>()
         {
             {"message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
             {"message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
@@ -16,6 +17,6 @@ namespace FundTransfer.Infra.Helpers
             {"properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
             {"props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
             {"machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
-        };
+        }.ToImmutableDictionary();
     }
 }

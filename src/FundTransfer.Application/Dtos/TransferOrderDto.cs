@@ -7,8 +7,6 @@ namespace FundTransfer.Application.Dtos
 {
     public class TransferOrderDto
     {
-        private readonly ILogger<TransferOrderDto> _logger;
-
         [Required(AllowEmptyStrings = false), MinLength(5)]
         public string SourceAccountNumber { get; init; }
 
@@ -18,15 +16,6 @@ namespace FundTransfer.Application.Dtos
         [Required, Range(0, double.PositiveInfinity)]
         public decimal Value { get; init; }
 
-        public TransferOrderDto()
-        {
-            
-        }
-        public TransferOrderDto(ILogger<TransferOrderDto> logger)
-        {
-            _logger = logger;
-        }
-
         public bool IsValid()
         {
             var sameAccountNumbers = SourceAccountNumber.Equals(DestinationAccountNumber);
@@ -34,7 +23,7 @@ namespace FundTransfer.Application.Dtos
             var destinationAccountValud = false.Equals(String.IsNullOrEmpty(DestinationAccountNumber));
             var validValue = Value >= Decimal.Zero;
 
-            return sameAccountNumbers == false && sourceAccountValid && destinationAccountValud &&  validValue;
+            return !sameAccountNumbers  && sourceAccountValid && destinationAccountValud &&  validValue;
         }
 
         public TransferOrder ToTransferOrder()
@@ -47,7 +36,7 @@ namespace FundTransfer.Application.Dtos
                     Value = Value,
                 };
 
-            throw new ArgumentException();
+            throw new ArgumentException("Cannot create domain model over an invalid dto.");
         }
     }
 }

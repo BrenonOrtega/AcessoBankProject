@@ -140,7 +140,7 @@ namespace FundTransfer.Infra.Services
                 }
             };
 
-            string tag = _channel.BasicConsume(_rabbitmqConfig.QueueName, false, consumer);
+            _channel.BasicConsume(_rabbitmqConfig.QueueName, false, consumer);
             await Task.CompletedTask;
         }
 
@@ -149,6 +149,7 @@ namespace FundTransfer.Infra.Services
             _channel.Close();
             _connection.Close();
             base.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }
