@@ -29,7 +29,7 @@ namespace FundTransfer.Infra.Helpers
 
             return services;
         }
-        
+
         public static IServiceCollection AddConfigurations(this IServiceCollection services, IConfiguration config)
         {
             services.Configure<RabbitmqConfiguration>(config.GetSection(RabbitmqConfiguration.RabbitMQ));
@@ -71,7 +71,7 @@ namespace FundTransfer.Infra.Helpers
         public static IServiceCollection AddAccountApiIntegration(this IServiceCollection services)
         {
             var defaultTimeSpan = TimeSpan.FromMinutes(5);
-            services.AddHttpClient<IAccountService, AccountService>()
+            services.AddHttpClient<IAccountService<HttpResponseMessage>, AccountService>()
                 .SetHandlerLifetime(defaultTimeSpan)
                 .AddPolicyHandler(GetRetryPolicy());
 
@@ -95,8 +95,8 @@ namespace FundTransfer.Infra.Helpers
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(result => result.IsSuccessStatusCode.Equals(false))
-                .RetryForeverAsync()
+                .OrResult(result => result.IsSuccessStatusCode.Equals(false) && !result.StatusCode.Equals(HttpStatusCode.BadRequest))
+                .WaitAndRetryForeverAsync(retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                 ;
         }
     }
