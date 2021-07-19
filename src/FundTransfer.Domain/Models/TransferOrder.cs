@@ -8,7 +8,7 @@ namespace FundTransfer.Domain.Models
     {
         [Key]
         [Required]
-        public Guid TransactionId { get; init; } = new Guid();
+        public Guid TransactionId { get; init; } = Guid.NewGuid();
 
         public DateTime CreatedAt { get; init; } = DateTime.Now;
 
@@ -37,7 +37,6 @@ namespace FundTransfer.Domain.Models
         }
 
         public string ErrorMessage { get; set; }
-
 
         public bool IsValid()
         {
