@@ -87,7 +87,7 @@ namespace FundTransfer.Infra.Helpers
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => !msg.StatusCode.Equals(HttpStatusCode.NotFound) && msg.IsSuccessStatusCode.Equals(false))
-                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .WaitAndRetryForeverAsync(retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                 ;
         }
 
