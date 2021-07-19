@@ -6,6 +6,7 @@ using FundTransfer.Application.Dtos;
 using FundTransfer.Domain.Models;
 using FundTransfer.Domain.Repositories.Queries;
 using FundTransfer.Domain.Repositories.Commands;
+using System;
 
 namespace FundTransfer.Application.Controllers
 {
@@ -49,7 +50,7 @@ namespace FundTransfer.Application.Controllers
                 await _transferOrderCommander.Create(order);
 
                 var result = new { order.TransactionId };
-                return CreatedAtAction(nameof(Get), result, result);
+                return CreatedAtAction(nameof(Get), result.TransactionId, result);
             }
 
             return BadRequest(new { Message = "Invalid account numbers." });
@@ -61,6 +62,14 @@ namespace FundTransfer.Application.Controllers
             var orders = await _transferOrderQuerier.GetAll();
             var status = orders.Select(order => new { order.TransactionId, order.Status });
             return Ok(status);
+        }
+
+        [HttpGet("{transactionId}")]
+        public async Task<IActionResult> Get(Guid transactionId)
+        {
+            var order = await _transferOrderQuerier.GetById(transactionId);
+
+            return order.IsValid() ? Ok(new { order.TransactionId, order.Status }) : NotFound(order);
         }
 
         private bool IsOperationAccountsValid(Account source, Account destination)
