@@ -3,11 +3,12 @@ namespace FundTransfer.Infra.Helpers.Rabbitmq
     public class RabbitmqConfiguration
     {
         public const string RabbitMQ = "rabbitmq";
-        public string Hostname { get; set; }
-        public int Port { get; set; }
-        public string QueueName { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public int NetworkRecoveryIntervalInSeconds { get; set; }
+        public string Hostname { get; init; }
+        public int Port { get; init; }
+        public string QueueName { get; init; }
+        public string Username { get; init; }
+        public string Password { get; init; }
+        public int NetworkRecoveryIntervalInSeconds { get; init; }
+        public string Vhost { get; init; }
     }
 }
