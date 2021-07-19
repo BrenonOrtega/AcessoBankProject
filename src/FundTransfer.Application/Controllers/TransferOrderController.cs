@@ -1,12 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using FundTransfer.Application.Dtos;
-using FundTransfer.Domain.Models;
-using FundTransfer.Domain.Repositories.Queries;
-using FundTransfer.Domain.Repositories.Commands;
 using System;
+using System.Net;
+using FundTransfer.Application.Services;
+using FundTransfer.Domain.Enum;
 
 namespace FundTransfer.Application.Controllers
 {
@@ -14,78 +13,50 @@ namespace FundTransfer.Application.Controllers
     [Route("fund-transfer")]
     public class FundTransferController : ControllerBase
     {
-        private readonly IAccountQueryRepository _accountQuerier;
-        private readonly ITransferOrderCommandRepository _transferOrderCommander;
-        private readonly ITransferOrderQueryRepository _transferOrderQuerier;
-        private readonly ILogger<FundTransferController> _logger;
+        private readonly TransferOrderService _service;
 
-        public FundTransferController(
-            IAccountQueryRepository accountQuerier,
-            ITransferOrderCommandRepository transferOrderCommander,
-            ITransferOrderQueryRepository transferOrderQuerier,
-            ILogger<FundTransferController> logger)
+        public FundTransferController(TransferOrderService service)
         {
-            _accountQuerier = accountQuerier;
-            _transferOrderCommander = transferOrderCommander;
-            _transferOrderQuerier = transferOrderQuerier;
-            _logger = logger;
+            _service = service;
         }
 
         [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Post([FromBody] TransferOrderDto orderDto)
         {
-            var (sourceAccount, destinationAccount) = await GetOrderAccounts(orderDto);
+            var order = await _service.CreateOrder(orderDto);
 
-            if (IsOperationAccountsValid(sourceAccount, destinationAccount))
+            if (order.Status != TransferOrderStatus.Error.ToString())
             {
-                TransferOrder order = orderDto.ToTransferOrder();
-
-                if (!order.IsValid())
-                {
-                    string errorMsg = $"Error while processing order Request Number {order.TransactionId}: {order.ErrorMessage}";
-                    _logger.LogError(errorMsg, order);
-                    return BadRequest(new { message = errorMsg, order.TransactionId, order.ErrorMessage });
-                }
-
-                await _transferOrderCommander.Create(order);
-
-                var result = new { order.TransactionId };
-                return CreatedAtAction(nameof(Get), result.TransactionId, result);
+                var response = new { order.TransactionId };
+                return CreatedAtAction(nameof(Get), response, response);
             }
-
-            return BadRequest(new { Message = "Invalid account numbers." });
+            return BadRequest(order);
         }
 
         [HttpGet]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> Get()
         {
-            var orders = await _transferOrderQuerier.GetAll();
-            var status = orders.Select(order => new { order.TransactionId, order.Status });
-            return Ok(status);
+            var orders = await _service.GetOrderStatus();
+
+            return orders.Any()
+                ? Ok(orders.Select(order => new { order.TransactionId, order.Status }))
+                : NoContent();
         }
 
         [HttpGet("{transactionId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(Guid transactionId)
         {
-            var order = await _transferOrderQuerier.GetById(transactionId);
+            var order = await _service.GetById(transactionId);
 
-            return order.IsValid() ? Ok(new { order.TransactionId, order.Status }) : NotFound(order);
-        }
-
-        private bool IsOperationAccountsValid(Account source, Account destination)
-        {
-            return source.IsValid() && destination.IsValid();
-        }
-
-        private async Task<(Account sourceAccount, Account destinationAccount)> GetOrderAccounts(TransferOrderDto orderDto)
-        {
-            var sourceAccountNumber = orderDto.SourceAccountNumber;
-            var sourceAccount = await _accountQuerier.GetByAccountNumber(sourceAccountNumber);
-
-            var destinationAccountNumber = orderDto.DestinationAccountNumber;
-            var destinationAccount = await _accountQuerier.GetByAccountNumber(destinationAccountNumber);
-
-            return (sourceAccount, destinationAccount);
+            return order.Status != TransferOrderStatus.Error.ToString()
+                ? Ok(new { order.TransactionId, order.Status })
+                : NotFound(new { order.ErrorMessage });
         }
     }
 
