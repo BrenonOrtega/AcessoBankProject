@@ -23,6 +23,5 @@ namespace FundTransfer.Application.Dtos
                 ErrorMessage = order.ErrorMessage
             };
         }
-        
     }
 }

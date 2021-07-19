@@ -4,10 +4,10 @@ using FundTransfer.Domain.Models;
 
 namespace FundTransfer.Domain.Services
 {
-    public interface IAccountService
+    public interface IAccountService<T>
     {
-        Task<IEnumerable<Account>> GetAccounts();
+        Task<T> GetAccounts();
         
-        Task<Account> GetByAccountNumber(string accountNumber);
+        Task<T> GetByAccountNumber(string accountNumber);
     }
 }
