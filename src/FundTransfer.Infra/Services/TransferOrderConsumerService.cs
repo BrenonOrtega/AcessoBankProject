@@ -12,6 +12,9 @@ using FundTransfer.Domain.Repositories.Commands;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
+using Polly;
+using System.Net.Sockets;
 
 namespace FundTransfer.Infra.Services
 {
@@ -25,9 +28,18 @@ namespace FundTransfer.Infra.Services
 
         private readonly ConnectionFactory _factory;
 
-        private readonly IConnection _connection;
+        private IConnection _connection;
 
-        private readonly IModel _channel;
+        private IModel _channel;
+
+        private static Policy RabbitmqPolicyFactory(ILogger<TransferOrderConsumerService> logger)
+        {
+            return Policy.Handle<SocketException>()
+                .Or<BrokerUnreachableException>()
+                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (ex, time) => logger.LogWarning(ex, ex.Message)
+                );
+        }
 
         public TransferOrderConsumerService(
             IOptions<RabbitmqConfiguration> option,
@@ -38,26 +50,25 @@ namespace FundTransfer.Infra.Services
             _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
 
-            _factory = new()
+            _factory = new ConnectionFactory()
             {
                 HostName = _rabbitmqConfig.Hostname,
                 Port = _rabbitmqConfig.Port,
                 UserName = _rabbitmqConfig.Username,
                 Password = _rabbitmqConfig.Password,
                 DispatchConsumersAsync = true,
-                NetworkRecoveryInterval = TimeSpan.FromSeconds(_rabbitmqConfig.NetworkRecoveryIntervalInSeconds)
+                VirtualHost = _rabbitmqConfig.Vhost
             };
 
-            _connection = _factory.CreateConnection();
+            var policy = RabbitmqPolicyFactory(_logger);
 
-            _channel = _connection.CreateModel();
-            _channel.QueueDeclare(
-                queue: _rabbitmqConfig.QueueName,
-                durable: false,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null
-            );
+            policy.Execute(() =>
+            {
+                _connection = _factory.CreateConnection();
+                _channel = _connection.CreateModel();
+            });
+
+            _channel.QueueDeclare(_rabbitmqConfig.QueueName, false, false, false, null);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -131,6 +142,13 @@ namespace FundTransfer.Infra.Services
 
             string tag = _channel.BasicConsume(_rabbitmqConfig.QueueName, false, consumer);
             await Task.CompletedTask;
+        }
+
+        public override void Dispose()
+        {
+            _channel.Close();
+            _connection.Close();
+            base.Dispose();
         }
     }
 }
