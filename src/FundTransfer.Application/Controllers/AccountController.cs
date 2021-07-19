@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using FundTransfer.Domain.Repositories.Queries;
+using System.Net;
 
 namespace FundTransfer.Application.Controllers
 {
@@ -11,27 +12,28 @@ namespace FundTransfer.Application.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly IAccountQueryRepository _accountRepository;
-        private readonly ILogger _logger;
 
-        public AccountsController(IAccountQueryRepository accountRepository, ILogger<AccountsController> logger)
+        public AccountsController(IAccountQueryRepository accountRepository)
         {
             _accountRepository = accountRepository;
-            _logger = logger;
         }
 
         [HttpGet]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> Get()
         {
             var accounts = await _accountRepository.GetAll();
-            _logger.LogInformation($"Executed: {nameof(Get)} - Queried Accounts Count: { accounts.Count() } ");
             return Ok(accounts);
         }
 
         [HttpGet("{accountNumber}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(string accountNumber)
         {
             var account = await _accountRepository.GetByAccountNumber(accountNumber);
-
+            
             return account.IsValid()
                 ? Ok(account)
                 : NotFound()
