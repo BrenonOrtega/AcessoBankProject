@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FundTransfer.Infra.Helpers;
+using FundTransfer.Infra.Data;
 using Serilog;
 
 namespace AcessoTest.FundTransfer.Application
@@ -33,13 +35,18 @@ namespace AcessoTest.FundTransfer.Application
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AcessoTest.FundTransfer.Application", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FundTransfer.Application", Version = "v1" });
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, IConfiguration configuration)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, IConfiguration configuration, FundTransferContext context)
         {
+            if(context.Database.CanConnect())
+            {
+                context.Database.Migrate();
+            }
+
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .Enrich.FromLogContext()
@@ -50,7 +57,7 @@ namespace AcessoTest.FundTransfer.Application
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AcessoTest.FundTransfer.Application v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FundTransfer.Application v1"));
             }
 
             app.UseHttpsRedirection();
