@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using FundTransfer.Application.Services;
 using FundTransfer.Infra.Helpers;
 using FundTransfer.Infra.Data;
 using Serilog;
@@ -32,6 +33,7 @@ namespace AcessoTest.FundTransfer.Application
 
             ///<Summary>Application Setup</Summary>
             services.AddApplicationInfra(Configuration);
+            services.AddScoped<TransferOrderService>();
 
             services.AddSwaggerGen(c =>
             {
@@ -42,7 +44,7 @@ namespace AcessoTest.FundTransfer.Application
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, IConfiguration configuration, FundTransferContext context)
         {
-            if(context.Database.CanConnect())
+            if (context.Database.CanConnect())
             {
                 context.Database.Migrate();
             }
