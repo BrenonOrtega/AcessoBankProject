@@ -55,8 +55,8 @@ namespace FundTransfer.Application.Controllers
             var order = await _service.GetById(transactionId);
 
             return order.Status != TransferOrderStatus.Error.ToString()
-                ? Ok(new { order.TransactionId, order.Status })
-                : NotFound(new { order.ErrorMessage });
+                ? Ok(new { order.Status })
+                : NotFound(new { order.Status, order.ErrorMessage });
         }
     }
 }
