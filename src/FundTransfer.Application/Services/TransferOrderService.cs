@@ -48,6 +48,12 @@ namespace FundTransfer.Application.Services
                 ? new TransferOrderReadDto(order)
                 : new TransferOrderReadDto("Transfer order does not exist");
 
+            _logger.LogInformation(
+                "Transfer order queried:{order} Id: {transactionId} | Status: {status}",
+                order,
+                order.TransactionId,
+                order.Status);
+
             return orderDto;
         }
 
@@ -65,8 +71,8 @@ namespace FundTransfer.Application.Services
                     _logger.LogError(errorMsg, order.TransactionId, order.ErrorMessage, order);
                 }
 
+                _logger.LogInformation("Created Order {order} | Id: {transactionId}", order, order.TransactionId);
                 return readDto;
-
             }
             catch (ArgumentException ae)
             {
