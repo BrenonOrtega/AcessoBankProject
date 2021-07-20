@@ -59,6 +59,4 @@ namespace FundTransfer.Application.Controllers
                 : NotFound(new { order.ErrorMessage });
         }
     }
-
-
 }
