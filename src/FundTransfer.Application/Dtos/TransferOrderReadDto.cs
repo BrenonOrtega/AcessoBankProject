@@ -26,7 +26,6 @@ namespace FundTransfer.Application.Dtos
             TransactionId = order.TransactionId;
             Status = order.Status.ToString();
             ErrorMessage = order.ErrorMessage;
-
         }
     }
 }

@@ -23,6 +23,8 @@ namespace FundTransfer.Domain.Models
         [Required]
         public decimal Value { get; init; }
 
+        public string ErrorMessage { get; set; }
+
         private TransferOrderStatus _status;
 
         [EnumDataType(typeof(TransferOrderStatus))]
@@ -35,8 +37,6 @@ namespace FundTransfer.Domain.Models
                 NotifyPropertyChanged();
             }
         }
-
-        public string ErrorMessage { get; set; }
 
         public bool IsValid()
         {

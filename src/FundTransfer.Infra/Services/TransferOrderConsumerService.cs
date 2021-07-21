@@ -127,7 +127,7 @@ namespace FundTransfer.Infra.Services
                 async Task HandleTransactionException(TransferOrder order, Exception ex)
                 {
                     receivedOrder.SetErrorStatus(ex.Message);
-                    await _orderCommander.Update(order, order);
+                    await _orderCommander.Update(order.TransactionId, order);
 
                     _logger.LogError(
                         ex,

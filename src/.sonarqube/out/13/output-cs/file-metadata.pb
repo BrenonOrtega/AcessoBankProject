@@ -1,0 +1,15 @@
+}
+tC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Data\FundTransferContext.csutf-8Ç
+yC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Helpers\PostgresSerilogHelper.csutf-8å
+ÇC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Helpers\Rabbitmq\RabbitmqConfiguration.csutf-8z
+qC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Helpers\ServicesSetup.csutf-8¢
+òC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Repositories\Commands\HttpBalanceAdjustmentCommandRepository.csutf-8ö
+êC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Repositories\Commands\TransferOrderCommandRepository.csutf-8ï
+ãC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Repositories\Queries\HttpAccountQueryRepository.csutf-8ó
+çC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Repositories\Queries\TransferOrderQueryRepository.csutf-8|
+sC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Services\AccountService.csutf-8Ü
+}C:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Services\BalanceAdjustmentService.csutf-8ã
+ÅC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Services\TransferOrderConsumerService.csutf-8Ñ
+{C:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\Services\TransferOrderPublisher.csutf-8§
+òC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\obj\Debug\net5.0\.NETCoreApp,Version=v5.0.AssemblyAttributes.csutf-8ò
+åC:\Users\Bryan\Documents\Coding\Projects\CSharp\AcessoTestProject\src\FundTransfer.Infra\obj\Debug\net5.0\FundTransfer.Infra.AssemblyInfo.csutf-8
