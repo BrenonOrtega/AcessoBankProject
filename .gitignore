@@ -6,6 +6,8 @@
 #vs code settings
 .vscode/
 
+#sonarqube settings
+.sonarqube/
 
 # User-specific files
 *.rsuser
